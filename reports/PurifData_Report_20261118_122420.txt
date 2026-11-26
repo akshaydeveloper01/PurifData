@@ -1,0 +1,65 @@
+PURIFDATA - FINAL DATA QUALITY REPORT
+=======================================================
+
+Generated: 2026-11-18 12:24:20
+Original file: PurifData_Messy_Test_Dataset.xlsx
+Cleaned file: PurifData_Messy_Test_Dataset_cleaned.xlsx
+
+INITIAL DATA QUALITY ASSESSMENT
+=======================================================
+Initial rows: 52
+Initial columns: 13
+Detected issue categories: 15
+
+Missing values in 'Email': 1
+Missing values in 'Phone': 2
+Missing values in 'Age': 1
+Missing values in 'Salary': 1
+Blank values in 'Name': 1
+Duplicate records: 1
+Invalid email addresses in 'Email': 2
+Invalid phone numbers in 'Phone': 2
+Invalid age values in 'Age': 3
+Invalid salary values in 'Salary': 1
+Suspicious zero salary in 'Salary': 2
+Invalid joining dates in 'Joining_Date': 2
+Unrecognized status values in 'Status': 2
+Possible inconsistent city names in 'City': 3
+Possible inconsistent state names in 'State': 1
+
+CLEANING OPERATIONS
+=======================================================
+Missing values in 'Email' | Manual Review | Affected: 0
+Missing values in 'Phone' | Manual Review | Affected: 0
+Blank values in 'Name' | Completed | Affected: 1
+Duplicate records | Completed | Affected: 1
+Invalid email addresses in 'Email' | Manual Review | Affected: 0
+Invalid phone numbers in 'Phone' | Skipped | Affected: 0
+Missing values in 'Age' | Manual Review | Affected: 0
+Missing values in 'Salary' | Manual Review | Affected: 0
+Invalid age values in 'Age' | Manual Review | Affected: 0
+Invalid salary values in 'Salary' | Manual Review | Affected: 0
+Suspicious zero salary in 'Salary' | Manual Review | Affected: 0
+Invalid joining dates in 'Joining_Date' | Manual Review | Affected: 0
+Unrecognized status values in 'Status' | Manual Review | Affected: 0
+Possible inconsistent city names in 'City' | Manual Review | Affected: 0
+Possible inconsistent state names in 'State' | Manual Review | Affected: 0
+
+BEFORE AND AFTER COMPARISON
+=======================================================
+Original rows: 52
+Cleaned rows: 51
+Original missing values: 5
+Cleaned missing values: 6
+Original duplicate rows: 1
+Cleaned duplicate rows: 0
+Column structure unchanged: True
+
+DATA SECURITY AND APPROVAL
+=======================================================
+Original dataset was not overwritten.
+Cleaning operations required explicit user approval.
+Only supported approved operations were automatically executed.
+Unsupported operations were retained for manual review.
+
+END OF REPORT

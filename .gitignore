@@ -1,0 +1,31 @@
+
+# Environment variables and API secrets
+.env
+.env.*
+
+# Allow example environment configuration
+!.env.example
+
+# Python virtual environment
+venv/
+.venv/
+
+# Python cache files
+__pycache__/
+*.py[cod]
+
+# VS Code settings
+.vscode/
+# PyInstaller build files
+build/
+dist/
+*.spec
+
+# Local database
+data/
+*.db
+*.sqlite
+
+# Generated reports and logs
+*.log
+ai_analysis_result.txt

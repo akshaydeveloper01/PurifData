@@ -1,0 +1,50 @@
+PURIFDATA - FINAL DATA QUALITY REPORT
+=======================================================
+
+Generated: 2026-11-19 11:34:32
+Original file: TestDD.xlsx
+Cleaned file: TestDD_cleaned_2.xlsx
+
+INITIAL DATA QUALITY ASSESSMENT
+=======================================================
+Initial rows: 12
+Initial columns: 3
+Detected issue categories: 5
+
+Missing values in 'Age': 2
+Missing values in 'City': 1
+Duplicate records: 1
+Invalid age values in 'Age': 2
+Inconsistent text capitalization in 'City': 2
+
+CLEANING OPERATIONS
+=======================================================
+Duplicate records | Completed | Affected: 1
+Exact duplicate rows removed.
+Missing values in 'Age' | Completed | Affected: 2
+Missing values filled using the median strategy.
+Missing values in 'City' | Manual Review | Affected: 0
+A valid filling value could not be calculated.
+Invalid age values in 'Age' | Completed | Affected: 2
+Invalid numeric values converted into missing values. Existing valid values were preserved.
+Inconsistent text capitalization in 'City' | Completed | Affected: 1
+Inconsistent text capitalization standardized using the most common existing spelling.
+
+BEFORE AND AFTER COMPARISON
+=======================================================
+Original rows: 12
+Cleaned rows: 11
+Original missing values: 3
+Cleaned missing values: 3
+Original duplicate rows: 1
+Cleaned duplicate rows: 0
+Column structure unchanged: True
+
+DATA SECURITY AND APPROVAL
+=======================================================
+Original dataset was not overwritten.
+Cleaning operations required explicit user approval.
+Only supported approved operations were automatically executed.
+Unsupported operations were retained for manual review.
+
+END OF REPORT
