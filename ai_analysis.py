@@ -16,10 +16,9 @@ BASE_DIR = Path(__file__).resolve().parent
 
 load_dotenv(BASE_DIR / ".env")
 
-API_KEY = os.getenv("GEMINI_API_KEY")
 MODEL = os.getenv("GEMINI_MODEL", "gemini-3.5-flash-lite")
 
-REQUEST_TIMEOUT = 180000  # 180 seconds
+REQUEST_TIMEOUT = 180000
 
 RETRY_DELAYS = [5, 15, 30]
 MAX_ATTEMPTS = len(RETRY_DELAYS) + 1
@@ -27,6 +26,109 @@ MAX_ATTEMPTS = len(RETRY_DELAYS) + 1
 MAX_OUTPUT_TOKENS = 4500
 
 REPORT_PATH = BASE_DIR / "ai_analysis_result.txt"
+
+
+# --------------------------------------------------
+# LOCAL API KEY STORAGE
+# --------------------------------------------------
+
+# Store configuration in the user's Windows profile.
+# It is not stored inside the GitHub project folder.
+
+APP_DATA = Path(
+    os.getenv(
+        "APPDATA",
+        str(Path.home() / "AppData" / "Roaming")
+    )
+)
+
+CONFIG_DIR = APP_DATA / "PurifData"
+CONFIG_PATH = CONFIG_DIR / "gemini_config.json"
+
+
+def get_api_key():
+    """
+    Read the Gemini API key.
+
+    First checks the environment variable.
+    Then checks the local configuration file.
+    """
+
+    api_key = os.getenv("GEMINI_API_KEY")
+
+    if api_key:
+        return api_key.strip()
+
+    try:
+
+        if CONFIG_PATH.exists():
+
+            with open(
+                CONFIG_PATH,
+                "r",
+                encoding="utf-8"
+            ) as file:
+
+                config = json.load(file)
+
+                return config.get(
+                    "GEMINI_API_KEY", ""
+                ).strip()
+
+    except (OSError, json.JSONDecodeError):
+        return ""
+
+    return ""
+
+
+def save_api_key(api_key):
+    """
+    Save the user's Gemini API key locally.
+    """
+
+    api_key = api_key.strip()
+
+    if not api_key:
+        return False
+
+    try:
+
+        CONFIG_DIR.mkdir(
+            parents=True,
+            exist_ok=True
+        )
+
+        with open(
+            CONFIG_PATH,
+            "w",
+            encoding="utf-8"
+        ) as file:
+
+            json.dump(
+                {"GEMINI_API_KEY": api_key},
+                file
+            )
+
+        return True
+
+    except OSError:
+        return False
+
+
+def delete_api_key():
+    """
+    Delete the locally saved Gemini API key.
+    """
+
+    try:
+
+        if CONFIG_PATH.exists():
+            CONFIG_PATH.unlink()
+
+        return True
+
+    except OSError:
+        return False
 
 
 # --------------------------------------------------
@@ -97,17 +199,25 @@ def is_temporary_error(error):
     )
 
 
+# --------------------------------------------------
+# GEMINI AI ANALYSIS
+# --------------------------------------------------
 
 def analyze_quality_issues(issue_summary, dataset_profile=None):
     """
-    Analyze dataset quality issues using Gemini Interactions API.
+    Analyze dataset quality issues using Gemini.
 
     Only issue metadata and dataset dimensions are sent.
     Original dataset records are never sent.
     """
 
-    if not API_KEY:
-        return "Error: GEMINI_API_KEY not found in .env file."
+    api_key = get_api_key()
+
+    if not api_key:
+        return (
+            "Error: Gemini API key not found. "
+            "Please configure your Gemini API key."
+        )
 
     if not isinstance(issue_summary, list):
         return "Error: Invalid quality issue information."
@@ -117,7 +227,6 @@ def analyze_quality_issues(issue_summary, dataset_profile=None):
             "No quality issues detected. "
             "AI analysis is not required."
         )
-
 
     try:
 
@@ -177,11 +286,8 @@ def analyze_quality_issues(issue_summary, dataset_profile=None):
         return f"Invalid analysis data: {error}"
 
     request_data = {
-
         "dataset_profile": safe_profile,
-
         "quality_issues": safe_issues
-
     }
 
     # --------------------------------------------------
@@ -224,10 +330,6 @@ IMPORTANT RULES:
 - Do not request or assume access to original dataset records.
 """
 
-    # --------------------------------------------------
-    # PREPARE GEMINI PROMPT
-    # --------------------------------------------------
-
     prompt = (
         instructions
         + "\n\nDataset information:\n"
@@ -252,17 +354,9 @@ IMPORTANT RULES:
         print("API: Interactions API")
         print("Model:", MODEL)
 
-        print(
-            "Request timeout:",
-            REQUEST_TIMEOUT // 1000,
-            "seconds"
-        )
-
-        print("Maximum attempts:", MAX_ATTEMPTS)
-
         client = genai.Client(
 
-            api_key=API_KEY,
+            api_key=api_key,
 
             http_options={
                 "timeout": REQUEST_TIMEOUT
@@ -292,9 +386,7 @@ IMPORTANT RULES:
                     input=prompt,
 
                     generation_config={
-
                         "max_output_tokens": MAX_OUTPUT_TOKENS
-
                     }
 
                 )

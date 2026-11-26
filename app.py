@@ -1,4 +1,3 @@
-
 import sys
 import os
 import re
@@ -13,12 +12,17 @@ from PySide6.QtWidgets import (
     QPushButton, QLineEdit, QFrame,
     QFileDialog, QPlainTextEdit,
     QScrollArea, QSizePolicy,
-    QMessageBox
+    QMessageBox, QInputDialog
 )
 
 from PySide6.QtCore import Qt, QThread, Signal
 
-from ai_analysis import analyze_quality_issues
+from ai_analysis import (
+    analyze_quality_issues,
+    get_api_key,
+    save_api_key
+)
+
 from cleaning_plan import generate_cleaning_plan
 from cleaning_preview import generate_cleaning_preview
 from cleaning_engine import clean_dataset, read_original_dataset
@@ -1212,6 +1216,12 @@ class PurifDataApp(QMainWindow):
     # GEMINI AI ANALYSIS
     # --------------------------------------------------
 
+    
+
+    # --------------------------------------------------
+    # GEMINI AI ANALYSIS
+    # --------------------------------------------------
+
     def start_ai_analysis(self):
 
         if not self.is_valid_dataset():
@@ -1219,7 +1229,6 @@ class PurifDataApp(QMainWindow):
             self.ai_output.setPlainText(
                 "Please select a valid dataset."
             )
-
             return
 
         if not self.assessment_completed:
@@ -1227,7 +1236,6 @@ class PurifDataApp(QMainWindow):
             self.ai_output.setPlainText(
                 "Complete quality assessment first."
             )
-
             return
 
         if not self.current_session_id:
@@ -1235,12 +1243,65 @@ class PurifDataApp(QMainWindow):
             self.ai_output.setPlainText(
                 "No active database session."
             )
-
             return
 
         if self.ai_worker and self.ai_worker.isRunning():
             return
 
+        # Check whether Gemini API key exists
+        api_key = get_api_key()
+
+        if not api_key:
+
+            dialog = QInputDialog(self)
+
+            dialog.setWindowTitle(
+                "Gemini API Configuration"
+            )
+
+            dialog.setLabelText(
+                "Paste your Gemini API key:\n\n"
+                "Get your API key from Google AI Studio."
+            )
+
+            # Visible input field supports Ctrl + V
+            dialog.setTextEchoMode(QLineEdit.Normal)
+
+            dialog.setOkButtonText("Save API Key")
+            dialog.setCancelButtonText("Cancel")
+
+            if not dialog.exec():
+                return
+
+            api_key = dialog.textValue().strip()
+
+            if not api_key:
+
+                QMessageBox.warning(
+                    self,
+                    "API Key Required",
+                    "Please enter your Gemini API key."
+                )
+                return
+
+            # Save API key locally
+            if not save_api_key(api_key):
+
+                QMessageBox.critical(
+                    self,
+                    "Configuration Error",
+                    "Could not save the API key locally."
+                )
+                return
+
+            QMessageBox.information(
+                self,
+                "Configuration Successful",
+                "Gemini API key saved successfully.\n\n"
+                "You can now generate AI analysis."
+            )
+
+        # Start Gemini analysis
         self.ai_btn.setEnabled(False)
         self.ai_btn.setText("Analyzing...")
 
@@ -1258,6 +1319,10 @@ class PurifDataApp(QMainWindow):
         )
 
         self.ai_worker.start()
+
+    # --------------------------------------------------
+    # DISPLAY AI ANALYSIS
+    # --------------------------------------------------
 
     def display_ai_analysis(self, result):
 
@@ -1304,8 +1369,10 @@ class PurifDataApp(QMainWindow):
 
             print("AI logging failed:", error)
 
-        self.ai_btn.setEnabled(True)
-        self.ai_btn.setText("Generate AI Analysis")
+        finally:
+
+            self.ai_btn.setEnabled(True)
+            self.ai_btn.setText("Generate AI Analysis")
 
     # --------------------------------------------------
     # CLEANING PLAN
